@@ -16,7 +16,20 @@ else
     cgs = 3*ones(size(unique(clu))); % all unsorted
 end
 
-[cids, uQ, cR] = sqKilosort.maskedClusterQuality(resultsDirectory);
+% note: maskedClusterQuality() and isiViolations() return metrics only for
+%       cluters for which spikes occur... if we're post-processing virtually
+%       concatenated files then it is possible that this is only a subset
+%       of all clusters.
+[cids_, uQ_, cR_] = sqKilosort.maskedClusterQuality(resultsDirectory);
 
-isiV = sqKilosort.isiViolations(resultsDirectory);
+isiV_ = sqKilosort.isiViolations(resultsDirectory);
 
+% pad if necessary (see note above)
+uQ = zeros(size(cids))';
+cR = NaN(size(cids))';
+isiV = NaN(size(cids));
+
+ix = ismember(cids+1,cids_); % +1 because id's in cluster_groups.csv start at 0
+uQ(ix) = uQ_;
+cR(ix) = cR_;
+isiV(ix) = isiV_;
